@@ -3,7 +3,6 @@ collaborator = require('../controllers/collaborator')();
 
 class warehouse {
     getAllInventory(){
-        // we have two options either use promises or async wait
         // for getting data from DB server
         return new Promise( (resolve, reject)=>{
             const $query = 'SELECT * FROM warehouse_inventory_view';
@@ -19,24 +18,47 @@ class warehouse {
             });
             dbConnect.connection.end()
         });
-    } // getData()
+    } // getAllInventory()
 
     updateInventory(data){
         return new Promise( (resolve,reject)=>{
-            let chemicalID = collaborator.returnChemicalID(data.chemicalType);
+            // getting the warehouse inventory based on the chemical and warehouse id
+            // Updating the warehouse inventory.
+            dbConnect.connection.beginTransaction(function(err) {
+                if (err) { reject('transaction error', err) ; return }
+                const $query1 = `SELECT * FROM warehouse_inventory_view WHERE warehouse_id = ${data.warehouse_id} AND type = '${data.chemicalType}' ` ;
+                dbConnect.connection.query($query1,(error, result)=> {
 
-            const $query = `UPDATE warehouse_inventory SET quantity = '${data.quantity}' WHERE warehouse_id = ${data.warehouse_id} AND chemical_type_id = '${chemicalID}'` ;
 
-
-            dbConnect.connection.query($query , (err, rows)=>{
-                if(err){
-                    console.log('error in the query');
-                    reject(err)
-
-                }
-                resolve(rows);
-            })
-        });
+                        console.log(result);
+                        let chemicalID = collaborator.returnChemicalID(data.chemicalType);
+                        let newQuanity = result[0].quantity + data.quantity;
+                        // TODO Total quantity of all chemicals cannot be more of the newQuantity
+                        if(newQuanity > result[0].capacity){
+                            reject('Quantity cannot be more than  the capacity');
+                            return;
+                        }
+                    const $query2 = `UPDATE warehouse_inventory SET quantity = ${newQuanity} WHERE warehouse_id = ${data.warehouse_id} AND chemical_type_id = '${chemicalID}'` ;
+                    dbConnect.connection.query($query2, (err2, results) =>{
+                        if (err2) {
+                            return dbConnect.connection.rollback(function() {
+                                reject('Something wrong with teh query' , err2)
+                                return
+                            });
+                        }
+                        dbConnect.connection.commit(function(errCommit) {
+                            if (errCommit) {
+                                return dbConnect.connection.rollback(function() {
+                                  reject('Commit Error', errCommit)
+                                    return
+                                });
+                            }
+                           resolve('success')
+                        });
+                    });
+                });
+            });
+        }); // end of promise land
     } //updateInventory
 
 

@@ -2,12 +2,6 @@ dbConnect = require('../DB/connectDB');
 collaborator = require('../controllers/collaborator')();
 warehouseController = require('../controllers/warehouse')()
 class tickets {
-    //create a contrustor with empty array to export data
-    constructor(){
-        this.data = [];
-    }
-    //testing function
-
 
     checkAvaibleSpaceInWarehouse(truckIN){
             //global function variable
