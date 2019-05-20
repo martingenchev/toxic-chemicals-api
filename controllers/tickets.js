@@ -49,48 +49,50 @@ class tickets {
     }
 
 
-
-    createTicket(data){
-       return new Promise( (resolve,reject)=>{
-           let current_datetime = new Date()
-           let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
-           const $query = `Insert Into tickets values(null, '${formatted_date}' , '${data}')`;
-
-           dbConnect.connection.query($query, (err, rows)=>{
-               if(err){
-                   console.log('Error in the query');
-                   //promise didn't happend because of error
-                   reject(err);
-               }
-               resolve(rows.insertId);
-           })
-
-       })
-    }// end create ticket
-
     createTicketDetails(data){
        return new Promise( (resolve, reject)=>{
-           this.createTicket(1).then(ticketId=>{
-               data.forEach(ticketDetails=>{
-                  // converting the chemical type into ID based on the DB
-                   let chemicalID = collaborator.returnChemicalID(ticketDetails.chemicalType);
-                    const $query = `INSERT INTO ticket_details VALUES(null, '${ticketId}', '${chemicalID}', '${ticketDetails.quantity}', '${ticketDetails.warehouse_id}' )`
+            // inserting ticket based on arrival
+           // inserting ticket details
+           dbConnect.connection.beginTransaction( (err)=>{
+               if(err) { reject('transaction error', err); return; }
+               let current_datetime = new Date()
+               let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
+               const $query1 = `INSERT INTO tickets values(null, '${formatted_date}' , 1 , 1 )`;
 
-                   dbConnect.connection.query($query, (err,rows)=>{
-                       if(err){
-                           console.log('error in createticket queery', err);
-                           reject(err);
-                       }
-                        console.log(rows)
-                       resolve('ticket details done')
+               dbConnect.connection.query($query1 , (err, rows)=>{
+                   if(err){
+                       return dbConnect.connection.rollback(()=>{
+                           return  reject('error in the query', err);
+                       });
+                   }
+                   let ticketId = rows.insertId;
+                   data.forEach(ticketDetails=>{
+
+                       let chemicalID = collaborator.returnChemicalID(ticketDetails.chemicalType);
+                       const  $query2 = `INSERT INTO ticket_details VALUES(null, '${ticketId}', '${chemicalID}', '${ticketDetails.quantity}', '${ticketDetails.warehouse_id}' )`;
+                        dbConnect.connection.query($query2 , (err2, result)=>{
+                            if(err2){
+                                return dbConnect.connection.rollback(()=>{
+                                    return reject('error in the query', err2)
+                                });
+                            }
+                            dbConnect.connection.commit((errCommit)=>{
+                               if(errCommit){
+                                   return dbConnect.connection.rollback(()=>{
+                                       return reject('Commit Error', errCommit)
+                                   })
+                               }
+                               resolve('success')
+                            })
+                        })// second query
+
                    });
 
-               }); // end foreach loop
+               }); // end of first query
+           }); // end of transaction
 
-
-           })
        })
-    }
+    }// createTicketDetails
 
     }// end of time
 
