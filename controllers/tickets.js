@@ -57,7 +57,7 @@ class tickets {
                if(err) { reject('transaction error', err); return; }
                let current_datetime = new Date()
                let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
-               const $query1 = `INSERT INTO tickets values(null, '${formatted_date}' , 1 , 1 )`;
+               const $query1 = `INSERT INTO tickets values(null, '${formatted_date}' , 1  )`;
 
                dbConnect.connection.query($query1 , (err, rows)=>{
                    if(err){
@@ -69,7 +69,7 @@ class tickets {
                    data.forEach(ticketDetails=>{
 
                        let chemicalID = collaborator.returnChemicalID(ticketDetails.chemicalType);
-                       const  $query2 = `INSERT INTO ticket_details VALUES(null, '${ticketId}', '${chemicalID}', '${ticketDetails.quantity}', '${ticketDetails.warehouse_id}' )`;
+                       const  $query2 = `INSERT INTO ticket_details VALUES(null, '${ticketId}', '${chemicalID}', '${ticketDetails.quantity}', '${ticketDetails.warehouse_id}'  , 1)`;
                         dbConnect.connection.query($query2 , (err2, result)=>{
                             if(err2){
                                 return dbConnect.connection.rollback(()=>{
@@ -93,6 +93,20 @@ class tickets {
 
        })
     }// createTicketDetails
+
+    getIncomeActiveTicket(){
+        return new Promise((resolve, reject)=>{
+            // this is a view
+            const $query = 'SELECT * FROM active_tickets';
+
+            dbConnect.connection.query($query , (err,rows)=>{
+                if(err){
+                    return reject('something wrong with the query', err);
+                }
+                resolve(rows)
+            })
+        }) // promise
+    } // getIncomeActiveTicket
 
     }// end of time
 
