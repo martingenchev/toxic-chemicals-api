@@ -55,7 +55,7 @@ class tickets {
            // inserting ticket details
            dbConnect.connection.beginTransaction( (err)=>{
                if(err) { reject('transaction error', err); return; }
-               let current_datetime = new Date()
+               let current_datetime = new Date();
                let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
                const $query1 = `INSERT INTO tickets values(null, '${formatted_date}' , 1  )`;
 
@@ -66,6 +66,8 @@ class tickets {
                        });
                    }
                    let ticketId = rows.insertId;
+                   // looping thought the generated ticket details
+                   // to insert them as active in DB
                    data.forEach(ticketDetails=>{
 
                        let chemicalID = collaborator.returnChemicalID(ticketDetails.chemicalType);
