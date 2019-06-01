@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
     port : '8889',
     user     : 'root',
     password : 'root',
-    database : 'techbbq'
+    database : 'toxic_chemical_industry'
 });
 
 module.exports = {connection};
