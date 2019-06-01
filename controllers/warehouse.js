@@ -66,7 +66,7 @@ class warehouse {
                                         return reject('Commit Error', errCommit)
                                     });
                                 }
-                                resolve('success')
+                                resolve({'message':'success'})
                             });
                         }) // third query
 
