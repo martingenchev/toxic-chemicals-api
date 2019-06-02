@@ -1,5 +1,5 @@
 # toxic-chemicals-api
-school project about how to manage toxic chemical is warehouse. Moire description cooming 
+
 
 #How to install the project
 0.add the Databse sql structure in your phpmyadmin
