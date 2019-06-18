@@ -1,4 +1,5 @@
 class collaborator {
+
     CheckForEmpty(JTruck,TotalInvetory, invetoryForA, invetoryForB){
         let jTicketDetails = [];
         //Looping through the truck invetory
@@ -49,9 +50,10 @@ class collaborator {
 
                         }
                     });
-                    //TODO this have refocatored in different function
+                    //TODO this have refactored in different function
                     // this is for having generated inventory for the second case
                     TotalInvetory.forEach(warehouseObjectFoundA=>{
+                        console.log('warehouseObjectA',warehouseObjectFoundA)
                         if(warehouseObjectFoundA.warehouse_id === inventoryAMatch.warehouse_id && warehouseObjectFoundA.type === "A"){
                             warehouseObjectFoundA.quantity += jTruckInvetory.quantity;
                             console.log('total inventory A', warehouseObjectFoundA);
@@ -126,6 +128,9 @@ class collaborator {
     checkWarehouseCapacity(warehouse_id, warehouseInvetory){
         let iWarehouseQuantity = 0 ;
         warehouseInvetory.forEach(warehouseObject=>{
+            if(!warehouseObject.warehouse_id){
+                return false
+            }
             if(warehouseObject.warehouse_id === warehouse_id){
                 iWarehouseQuantity += warehouseObject.quantity
             }
